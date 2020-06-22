@@ -47,6 +47,28 @@ def register():
     return jsonify('User Created!')
 
 
+@app.route('/api/users', methods=["GET"])
+def get_users():
+    all_users = User.query.all()
+    result = users_schema.dump(all_users)
+    return jsonify(result)
+
+
+@app.route('/api/login', methods=["POST"])
+def login():
+    post_data = request.get_json()
+    db_user = User.query.filter_by(username=post_data.get('username')).first()
+    if db_user is None:
+        return jsonify('Username NOT found')
+
+    password = post_data.get('password')
+    db_user_hashed_password = db_user.password
+    valid_password = flask_bcrypt.check_password_hash(db_user_hashed_password, password)
+    if valid_password:
+        return jsonify('User Verified')
+    
+    return jsonify('Password is not correct')
+
 # def sumNumber():
 #     print(2 + 2)
 
